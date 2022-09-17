@@ -183,31 +183,27 @@ export default {
     getLUTsList() {
       // https://api.github.com/repos/TheGordinho/MLUT
       this.$http
-        .get(
-          "https://api.github.com/repos/TheGordinho/MLUT/git/trees/dcb832a482d7fd220710d0bd9e1959a88c55ffe6"
-        )
-        .then((response) => {
-          const data = response.data.tree;
-          // let regex = /title="(.*?)".*data-pjax.*href="(.*?)"/g;
-          // let m;
-          // while ((m = regex.exec(response.data)) !== null) {
-          //   if (m.index === regex.lastIndex) {
-          //     regex.lastIndex++;
-          //   }
-          //   if (m[1] != "_BaseLUT.fxh") {
-          data.map((item) => {
-            const lutFx = "/TheGordinho/MLUT/master/Shaders/" + item.path;
-            const lutImg =
-              "/TheGordinho/MLUT/master/Textures/" +
-              item.path.replace(".fx", ".png");
-            this.lutList.push({
-              title: item.path,
-              link: lutFx,
-              lutImgSrc: lutImg,
-            });
+        .get("https://api.github.com/repos/TheGordinho/MLUT/commits")
+        .then((commits) => {
+          this.$http.get(commits.data[0].commit.tree.url).then((treeRoot) => {
+            const shadersList = treeRoot.data.tree.find((item) => item.path == "Shaders")
+            this.$http
+              .get(shadersList.url)
+              .then((response) => {
+                const data = response.data.tree;
+                data.map((item) => {
+                  const lutFx = "/TheGordinho/MLUT/master/Shaders/" + item.path;
+                  const lutImg =
+                    "/TheGordinho/MLUT/master/Textures/" +
+                    item.path.replace(".fx", ".png");
+                  this.lutList.push({
+                    title: item.path,
+                    link: lutFx,
+                    lutImgSrc: lutImg,
+                  });
+                });
+              });
           });
-          //   }
-          // }
         });
     },
     getLutData() {
